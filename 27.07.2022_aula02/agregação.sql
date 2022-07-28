@@ -17,4 +17,19 @@ WHERE DATE(dtDeliveredCustomer) > DATE(dtEstimatedDelivered)
 
 -- COMMAND ----------
 
+SELECT COUNT( DISTINCT idProduct) AS qtProduto
+FROM silver_olist.products
+WHERE descCategoryName = 'perfumaria'
+
+-- COMMAND ----------
+
+SELECT 
+    descCategoryName,
+    COUNT( DISTINCT idProduct) AS qtProduto,
+    ROUND(AVG(vlWeightGramas) / 100, 2) AS vlPeso
+FROM silver_olist.products
+GROUP BY descCategoryName
+
+-- COMMAND ----------
+
 
