@@ -100,4 +100,39 @@ ORDER BY flfreteCaro
 
 -- COMMAND ----------
 
+SELECT idOrder,
+       idSeller,
+       dtShippingLimit,
+       ROW_NUMBER() OVER (PARTITION BY idSeller ORDER BY dtShippingLimit DESC) AS row_number,
+       LAG(dtShippingLimit) OVER (PARTITION BY idSeller ORDER BY dtShippingLimit DESC) AS lagShippingLimit -- O CONTRARIO DE LAD É LEAD( )
+FROM silver_olist.order_items
+
+-- COMMAND ----------
+
+WITH order_sellers AS (
+
+SELECT idSeller, 
+       t2.dtApproved,
+      ROUND(SUM(vlPrice), 2) AS totalPrice
+      FROM silver_olist.order_items AS t1
+      LEFT JOIN silver_olist.orders AS t2
+      ON t1.idOrder = t2.idOrder
+      GROUP BY idSeller, t1.idOrder, t2.dtApproved
+), 
+
+rn_seller AS (
+SELECT *,
+       ROW_NUMBER() OVER (PARTITION BY idSeller ORDER BY dtApproved DESC) AS RN
+FROM order_sellers
+) 
+
+SELECT idSeller,
+       ROUND(AVG(totalPrice), 2) AS avgPrice
+FROM rn_seller
+WHERE rn <= 3
+GROUP BY idSeller
+ORDER BY avgPrice DESC
+
+-- COMMAND ----------
+
 
